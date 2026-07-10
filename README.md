@@ -4,6 +4,22 @@ A RESTful Booking Platform API built with NestJS and TypeScript for the EN2H Sof
 
 This API allows authenticated users to manage services and allows customers to create bookings for available services.
 
+## Live Deployment
+
+Live API URL:
+
+```text
+https://en2h-booking-platform-api.onrender.com
+```
+
+Live Swagger Documentation:
+
+```text
+https://en2h-booking-platform-api.onrender.com/api-docs
+```
+
+> Note: The API is deployed on Render using the free plan. The first request may take a short time if the service is inactive.
+
 ## Tech Stack
 
 - NestJS
@@ -15,6 +31,7 @@ This API allows authenticated users to manage services and allows customers to c
 - Class Validator
 - Jest Unit Testing
 - Docker
+- Render Deployment
 
 ## Features
 
@@ -52,12 +69,13 @@ Authenticated users can:
 
 - Pagination for bookings
 - Search bookings by customer name, email, or phone
-- Filter bookings by status
+- Filter bookings by booking status
 - Duplicate booking prevention
 - Global exception handling
 - Swagger request body examples
 - Unit testing with Jest
 - Docker support
+- Live deployment using Render
 
 ## Business Rules Implemented
 
@@ -150,6 +168,8 @@ A sample environment file is provided as `.env.example`.
 
 ## Database Setup
 
+This project uses SQLite with Prisma ORM.
+
 Run database migrations:
 
 ```bash
@@ -162,7 +182,7 @@ Generate Prisma Client:
 npx prisma generate
 ```
 
-## Running the Application
+## Running the Application Locally
 
 ```bash
 npm run start:dev
@@ -172,6 +192,12 @@ The API will run on:
 
 ```text
 http://localhost:3000
+```
+
+Local Swagger documentation will be available at:
+
+```text
+http://localhost:3000/api-docs
 ```
 
 ## Running with Docker
@@ -202,15 +228,29 @@ http://localhost:3000/api-docs
 
 ## API Documentation
 
-Swagger documentation is available at:
+Swagger documentation is available locally and live.
+
+Local Swagger Documentation:
 
 ```text
 http://localhost:3000/api-docs
 ```
 
-After starting the application, open this URL in a browser to view and test all API endpoints.
+Live Swagger Documentation:
+
+```text
+https://en2h-booking-platform-api.onrender.com/api-docs
+```
+
+After starting the application, open the Swagger URL in a browser to view and test all API endpoints.
 
 ## API Endpoints
+
+### App
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Health/root endpoint |
 
 ### Authentication
 
@@ -250,7 +290,7 @@ The `GET /bookings` endpoint supports pagination, search, and status filtering.
 | `search` | `Kavindi` | Search by customer name, email, or phone |
 | `status` | `CANCELLED` | Filter by booking status |
 
-Example:
+Examples:
 
 ```text
 GET /bookings?page=1&limit=5
@@ -358,15 +398,38 @@ Test Suites: 8 passed, 8 total
 Tests: 8 passed, 8 total
 ```
 
+## Deployment
+
+The API is deployed on Render.
+
+Live API URL:
+
+```text
+https://en2h-booking-platform-api.onrender.com
+```
+
+Live Swagger Documentation:
+
+```text
+https://en2h-booking-platform-api.onrender.com/api-docs
+```
+
+Production start command:
+
+```bash
+npx prisma migrate deploy && npm run start:prod
+```
+
 ## Assumptions Made
 
-- SQLite was used for easier local setup and testing.
+- SQLite was used for easier local setup and assessment testing.
 - Customers can create bookings without registering or logging in.
 - Service management is restricted to authenticated users.
 - Booking status can be updated only by authenticated users.
 - Duplicate bookings are not allowed for the same service, date, and time.
 - Booking date validation checks the booking date against the current date.
 - Docker support is provided for easier containerized setup.
+- SQLite is used for demo and assessment purposes. PostgreSQL is recommended for production use.
 
 ## Future Improvements
 
@@ -376,7 +439,8 @@ Tests: 8 passed, 8 total
 - Add advanced filtering for services.
 - Add role-based access control.
 - Add integration tests.
-- Deploy the API to a cloud platform.
+- Add admin/user role separation.
+- Add CI/CD workflow for automated testing and deployment.
 
 ## Author
 
