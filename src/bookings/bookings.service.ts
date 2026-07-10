@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BookingStatus } from '@prisma/client';
+import { BookingStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { QueryBookingDto } from './dto/query-booking.dto';
 
 @Injectable()
 export class BookingsService {
@@ -15,7 +16,9 @@ export class BookingsService {
 
   async create(createBookingDto: CreateBookingDto) {
     const service = await this.prisma.service.findUnique({
-      where: { id: createBookingDto.serviceId },
+      where: {
+        id: createBookingDto.serviceId,
+      },
     });
 
     if (!service) {
@@ -66,20 +69,70 @@ export class BookingsService {
     });
   }
 
-  findAll() {
-    return this.prisma.booking.findMany({
-      include: {
-        service: true,
+  async findAll(query: QueryBookingDto) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.BookingWhereInput = {};
+
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    if (query.search) {
+      where.OR = [
+        {
+          customerName: {
+            contains: query.search,
+          },
+        },
+        {
+          customerEmail: {
+            contains: query.search,
+          },
+        },
+        {
+          customerPhone: {
+            contains: query.search,
+          },
+        },
+      ];
+    }
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        include: {
+          service: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.booking.count({
+        where,
+      }),
+    ]);
+
+    return {
+      data: bookings,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    };
   }
 
   async findOne(id: number) {
     const booking = await this.prisma.booking.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
       include: {
         service: true,
       },
@@ -105,7 +158,9 @@ export class BookingsService {
     }
 
     return this.prisma.booking.update({
-      where: { id },
+      where: {
+        id,
+      },
       data: {
         status: updateStatusDto.status,
       },
@@ -119,7 +174,9 @@ export class BookingsService {
     await this.findOne(id);
 
     return this.prisma.booking.update({
-      where: { id },
+      where: {
+        id,
+      },
       data: {
         status: BookingStatus.CANCELLED,
       },

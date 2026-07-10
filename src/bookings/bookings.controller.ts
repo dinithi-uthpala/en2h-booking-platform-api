@@ -6,11 +6,13 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { QueryBookingDto } from './dto/query-booking.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('bookings')
@@ -23,10 +25,11 @@ export class BookingsController {
     return this.bookingsService.create(createBookingDto);
   }
 
+  // Authenticated users can view bookings with pagination, search, and status filter
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.bookingsService.findAll();
+  findAll(@Query() query: QueryBookingDto) {
+    return this.bookingsService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard)
