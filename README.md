@@ -13,6 +13,8 @@ This API allows authenticated users to manage services and allows customers to c
 - JWT Authentication
 - Swagger API Documentation
 - Class Validator
+- Jest Unit Testing
+- Docker
 
 ## Features
 
@@ -46,6 +48,17 @@ Authenticated users can:
 - Update booking status
 - Cancel bookings
 
+### Bonus Features Implemented
+
+- Pagination for bookings
+- Search bookings by customer name, email, or phone
+- Filter bookings by status
+- Duplicate booking prevention
+- Global exception handling
+- Swagger request body examples
+- Unit testing with Jest
+- Docker support
+
 ## Business Rules Implemented
 
 - A booking must belong to an existing service.
@@ -64,13 +77,58 @@ CANCELLED
 COMPLETED
 ```
 
+## Project Structure
+
+```text
+src/
+  auth/
+    dto/
+    auth.controller.ts
+    auth.module.ts
+    auth.service.ts
+    jwt-auth.guard.ts
+    jwt.strategy.ts
+
+  bookings/
+    dto/
+    bookings.controller.ts
+    bookings.module.ts
+    bookings.service.ts
+
+  common/
+    filters/
+      http-exception.filter.ts
+
+  prisma/
+    prisma.module.ts
+    prisma.service.ts
+
+  services/
+    dto/
+    services.controller.ts
+    services.module.ts
+    services.service.ts
+
+  app.module.ts
+  main.ts
+
+prisma/
+  migrations/
+  schema.prisma
+
+Dockerfile
+.dockerignore
+.env.example
+README.md
+```
+
 ## Installation Steps
 
 ### 1. Clone the repository
 
 ```bash
-git clone <your-github-repository-link>
-cd en2h-booking-api
+git clone https://github.com/dinithi-uthpala/en2h-booking-platform-api.git
+cd en2h-booking-platform-api
 ```
 
 ### 2. Install dependencies
@@ -116,6 +174,32 @@ The API will run on:
 http://localhost:3000
 ```
 
+## Running with Docker
+
+Build the Docker image:
+
+```bash
+docker build -t en2h-booking-api .
+```
+
+Run the container:
+
+```bash
+docker run -p 3000:3000 --env-file .env en2h-booking-api
+```
+
+The API will be available at:
+
+```text
+http://localhost:3000
+```
+
+Swagger documentation will be available at:
+
+```text
+http://localhost:3000/api-docs
+```
+
 ## API Documentation
 
 Swagger documentation is available at:
@@ -150,10 +234,29 @@ After starting the application, open this URL in a browser to view and test all 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
 | POST | `/bookings` | Create a booking | No |
-| GET | `/bookings` | Get all bookings | Yes |
+| GET | `/bookings` | Get all bookings with pagination, search, and status filter | Yes |
 | GET | `/bookings/:id` | Get booking by ID | Yes |
 | PATCH | `/bookings/:id/status` | Update booking status | Yes |
 | PATCH | `/bookings/:id/cancel` | Cancel booking | Yes |
+
+## Booking Query Parameters
+
+The `GET /bookings` endpoint supports pagination, search, and status filtering.
+
+| Query Parameter | Example | Description |
+|---|---|---|
+| `page` | `1` | Page number |
+| `limit` | `5` | Number of records per page |
+| `search` | `Kavindi` | Search by customer name, email, or phone |
+| `status` | `CANCELLED` | Filter by booking status |
+
+Example:
+
+```text
+GET /bookings?page=1&limit=5
+GET /bookings?search=Kavindi
+GET /bookings?status=CANCELLED
+```
 
 ## Sample Request Bodies
 
@@ -161,7 +264,7 @@ After starting the application, open this URL in a browser to view and test all 
 
 ```json
 {
-  "name": "Dinithi",
+  "name": "Dinithi Uthpala",
   "email": "dinithi@test.com",
   "password": "123456"
 }
@@ -218,6 +321,43 @@ For protected endpoints, include the JWT token in the request header:
 Authorization: Bearer <access_token>
 ```
 
+The access token is returned after successful login.
+
+## Error Response Format
+
+The API uses a global exception filter to return structured error responses.
+
+Example:
+
+```json
+{
+  "success": false,
+  "statusCode": 400,
+  "timestamp": "2026-07-10T02:05:09.168Z",
+  "path": "/bookings/1/status",
+  "message": {
+    "message": "Cancelled bookings cannot be marked as completed",
+    "error": "Bad Request",
+    "statusCode": 400
+  }
+}
+```
+
+## Testing
+
+Run unit tests:
+
+```bash
+npm test
+```
+
+Expected result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 8 passed, 8 total
+```
+
 ## Assumptions Made
 
 - SQLite was used for easier local setup and testing.
@@ -225,15 +365,17 @@ Authorization: Bearer <access_token>
 - Service management is restricted to authenticated users.
 - Booking status can be updated only by authenticated users.
 - Duplicate bookings are not allowed for the same service, date, and time.
+- Booking date validation checks the booking date against the current date.
+- Docker support is provided for easier containerized setup.
 
 ## Future Improvements
 
 - Add PostgreSQL support for production use.
 - Add refresh token authentication.
-- Add pagination for services and bookings.
-- Add search and filtering for bookings.
-- Add unit tests and integration tests.
-- Add Docker support.
+- Add pagination for services.
+- Add advanced filtering for services.
+- Add role-based access control.
+- Add integration tests.
 - Deploy the API to a cloud platform.
 
 ## Author
